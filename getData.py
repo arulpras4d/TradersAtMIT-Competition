@@ -10,7 +10,7 @@ buzz_time = []
 assoc_time = []
 alpha_time = []
 god_time = []
-#gets estimation data from news reports
+#gets estimation data from news
 def news_Callback(msg,TradersOrder):
 	temp = msg["news"]["body"].split(";")
 	tempTRA = temp[0].split(" ")
@@ -70,3 +70,4 @@ def news_Callback(msg,TradersOrder):
 #run tradersbot
 t.onNews = news_Callback
 t.run()
+print("done")

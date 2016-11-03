@@ -1,10 +1,8 @@
-#probably have to do this in between 1st and 2nd rounds
+#probably have to do this inbetween 1st and 2nd rounds
 import ast
 import numpy as np
 
-dataFile = 'data.txt'
-
-with open(dataFile) as f:
+with open('data.txt') as f:
 	content = f.readlines()
 
 #convert back to dictionaries/lists
