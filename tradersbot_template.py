@@ -1,10 +1,17 @@
 ### IMPORTS
 
 from tradersbot import TradersBot
+import argparse
 
 ### TRADERSBOT INITIALIZATION
 
-t = TradersBot('127.0.0.1', 'trader0', 'trader0')
+parser = argparse.ArgumentParser(description='Run a TradersBot')
+parser.add_argument('--addr', help='IP/URL', default='127.0.0.1')
+parser.add_argument('--user', help='Username', default='trader0')
+parser.add_argument('--pw', help='Password', default='trader0')
+args = parser.parse_args()
+
+t = TradersBot(args.addr, args.user, args.pw)
 
 ### GLOBAL VARIABLES
 
