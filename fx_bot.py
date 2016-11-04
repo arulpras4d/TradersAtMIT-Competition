@@ -10,6 +10,7 @@ parser = argparse.ArgumentParser(description='Run a TradersBot')
 parser.add_argument('--addr', help='IP/URL', default='127.0.0.1')
 parser.add_argument('--user', help='Username', default='trader0')
 parser.add_argument('--pw', help='Password', default='trader0')
+parser.add_argument('--threshold', help='Arbitrage Threshold', default=0.005)
 args = parser.parse_args()
 
 t = TradersBot(args.addr, args.user, args.pw)
@@ -22,14 +23,15 @@ cash = {'USD': 100000, 'JPY': 0, 'EUR': 0, 'CHF': 0, 'CAD': 0}
 cycles = [['EURCHF', 'CHFJPY', 'EURJPY'], ['USDCAD', 'EURUSD', 'EURCAD'], ['CHFJPY', 'USDCHF', 'USDJPY']]
 time_last_order = time.time() # prevent order overflow
 time_last_clear = time.time()
-arb_threshold = 0.005
-pnl_deltas = [0 for _ in range(10)]
+time_last_threshold_update = time.time()
+arb_threshold = float(args.threshold)
+pnl_deltas = [0 for _ in range(5)]
 current_pnl = 1
 transaction_fee = 0.0001
 
 ### FLAGS
 
-DELTASHIFT = 1
+DELTASHIFT = 0
 
 ### HELPER FUNCTIONS
 
@@ -57,8 +59,6 @@ def check_cycle(cycle):
                 min_ask, order_size = float(bid), sz
         asks[i] = (min_ask, order_size)
 
-    # print(bids[0][0] * bids[1][0]/asks[2][0])
-    # print(asks[0][0] * asks[1][0]/bids[2][0])
     if ((bids[0][0] + transaction_fee) * (bids[1][0] + transaction_fee)/(asks[2][0] + transaction_fee)) < 1 - arb_threshold:
         sz = min(bids[0][1], bids[1][1], asks[2][1])
         if sz >= 10:
@@ -75,7 +75,6 @@ def check_cycle(cycle):
             return ('NO', 0)
     else:
         return ('NO', 0)
-
 
 ### CALLBACKS
 
@@ -132,8 +131,8 @@ t.onMarketUpdate = market_update
 
 ## onTraderUpdate
 
-def cancel_old_orders(msg, TradersOrder):
-    global orderbook, time_last_clear, current_pnl, pnl_deltas, arb_threshold, DELTASHIFT
+def adjust_params(msg, TradersOrder):
+    global orderbook, time_last_clear, time_last_threshold_update, current_pnl, pnl_deltas, arb_threshold, DELTASHIFT
     counter = 0
     # clear 10 old orders every 3 seconds
     if (time.time() - time_last_clear > 3):
@@ -148,24 +147,24 @@ def cancel_old_orders(msg, TradersOrder):
                 counter += 1
             print('Orders cleared!')
     time_last_clear = time.time()
-    if current_pnl != 0:
-        pnl_deltas.append((msg['trader_state']['default_pnl'] - current_pnl)/current_pnl)
-    else:
-        pnl_deltas.append(0)
+    pnl_deltas.append((msg['trader_state']['default_pnl'] - current_pnl))
     pnl_deltas = pnl_deltas[1:]
-    avg_delta = sum(pnl_deltas)/10
+    total_delta = sum(pnl_deltas)
     current_pnl = msg['trader_state']['default_pnl']
-    if DELTASHIFT == 1:
-        if avg_delta < .005 and avg_delta > -0.005:
-            # not making enough money, narrow in
-            arb_threshold /= 2
-            print(arb_threshold)
-        if avg_delta < -.005:
+    print(current_pnl)
+    if DELTASHIFT == 1 and time.time() - time_last_threshold_update > 5:
+        # if total_delta < 25 and total_delta > -100:
+        #     # not making enough money, narrow in
+        #     arb_threshold *= 0.95
+        #     print('THRESHOLD CHANGE: ' + str(arb_threshold))
+        #     time_last_threshold_update = time.time()
+        if total_delta < -100:
             # losing too much money, push out
-            arb_threshold *= 2
-            print(arb_threshold)
+            arb_threshold *= 1.1
+            print('THRESHOLD CHANGE: ' + str(arb_threshold))
+            time_last_threshold_update = time.time()
 
-t.onTraderUpdate = cancel_old_orders
+t.onTraderUpdate = adjust_params
 
 ## onTrade
 
