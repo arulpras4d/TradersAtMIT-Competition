@@ -70,4 +70,3 @@ def news_Callback(msg,TradersOrder):
 #run tradersbot
 t.onNews = news_Callback
 t.run()
-print("done")
