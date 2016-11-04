@@ -66,7 +66,8 @@ def news_Callback(msg,TradersOrder):
 	f.write(str(god_time))
 	f.close()
 
-	#going to add something here to estimate true value every news report
+	#realTimeAnalysis.py
+	
 #run tradersbot
 t.onNews = news_Callback
 t.run()

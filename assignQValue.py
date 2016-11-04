@@ -47,9 +47,7 @@ def assignQ():
 		if gcount==0 and god_mean-std(i,god_time[0]) <= god['TRA'][0] <= god_mean+std(i,god_time[0]) and god_mean-std(i,god_time[1]) <= god['TRA'][1] <= god_mean+std(i,god_time[1]) and god_mean-std(i,god_time[2]) <= god['TRA'][2] <= god_mean+std(i,god_time[2]):
 			result['@ETFGodfather'] = i
 			gcount = 1
-	for j in result:
-		if result[j] == 0:
-			result[j] = 4
+
 	return result
 
 result = assignQ()
