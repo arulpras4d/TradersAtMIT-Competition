@@ -1,4 +1,6 @@
 from tradersbot import TradersBot
+from assignQValue import estimate_distribution_mean
+
 #initialize tradersbot
 t = TradersBot('localhost','trader0','trader0')
 
@@ -66,8 +68,8 @@ def news_Callback(msg,TradersOrder):
 	f.write(str(god_time))
 	f.close()
 
-	#going to add something here to estimate true value every news report
+	#from assignQValue.py
+	estimate_distribution_mean()
 #run tradersbot
 t.onNews = news_Callback
 t.run()
-print("done")
