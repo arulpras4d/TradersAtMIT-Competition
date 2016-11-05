@@ -93,6 +93,10 @@ def plot_vol_curves():
     plt.plot(calls, call_vols)
     plt.savefig('./call_plot.png')
     plt.clf()
+    log = open('options_log.txt', 'a')
+    log.write(implied_vols)
+    log.write('\n')
+    log.close()
 
 
 def calculate_implied_volatility():
